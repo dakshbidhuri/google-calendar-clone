@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  type        String   @default("event")
+  color       String   @default("blue")  // <--- ADD THIS LINE
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
