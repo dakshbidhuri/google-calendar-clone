@@ -1,37 +1,38 @@
 ![Project Preview](./preview.png)
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# Google Calendar Clone
 
-First, run the development server:
+A high-fidelity fullstack clone of Google Calendar built with Next.js 14, Tailwind CSS, and SQLite.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
+- **Monthly View**: Accurate date grid generation using `date-fns` to match the real Google Calendar logic.
+- **Event Management**:
+  - **Create**: Click any date to add an event.
+  - **Edit**: Click an event to modify details or color.
+  - **Delete**: Remove events directly from the modal.
+- **Color Coding**: Events can be categorized by 5 distinct colors (Blue, Red, Green, Purple, Yellow).
+- **High Fidelity UI**: Pixel-matched styling (fonts, borders, spacing) using Tailwind CSS.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Architecture & Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Frontend: Next.js (App Router)
+- **Framework**: Next.js was chosen for its server-side rendering and efficient routing.
+- **Styling**: Tailwind CSS allows for rapid, "utility-first" styling to mimic Google's Material Design exact pixel measurements.
+- **Icons**: `lucide-react` provides clean, modern icons (Menu, Chevron, Settings) that resemble Google's native iconography.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Backend: Next.js API Routes
+- **Monorepo Structure**: The backend logic resides in `app/api/` to keep the project lightweight and deployment simple.
+- [cite_start]**Database**: **SQLite** was selected as the requested lightweight database[cite: 22].
+- **ORM**: **Prisma** is used to interact with the database, ensuring type safety and easy schema management.
 
-## Learn More
+### 3. Business Logic
+- **Date Generation**: The calendar grid is generated dynamically. `date-fns` calculates the start/end of the current month and fills in the "padding days" from the previous/next month to ensure a complete 7x5 or 7x6 grid.
+- **State Management**: React `useState` handles the modal visibility and form inputs, while `useEffect` syncs with the backend API on load and after updates.
+- **Conflict Handling**: Multiple events on the same day stack vertically, preserving order based on insertion time.
 
-To learn more about Next.js, take a look at the following resources:
+## Setup & Run Instructions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Clone the repository**
+   ```bash
+   git clone [https://github.com/YOUR_USERNAME/google-calendar-clone.git](https://github.com/YOUR_USERNAME/google-calendar-clone.git)
+   cd google-calendar-clone
