@@ -8,11 +8,11 @@ import axios from 'axios';
 
 // FAIL-SAFE: Direct Hex codes for Background (light) and Text (dark)
 const colorStyles: any = {
-  blue:   { bg: '#dbeafe', text: '#1d4ed8', border: '#bfdbfe' }, // blue-100 / blue-700
-  red:    { bg: '#fee2e2', text: '#b91c1c', border: '#fecaca' }, // red-100 / red-700
-  green:  { bg: '#dcfce7', text: '#15803d', border: '#bbf7d0' }, // green-100 / green-700
-  purple: { bg: '#f3e8ff', text: '#7e22ce', border: '#e9d5ff' }, // purple-100 / purple-700
-  yellow: { bg: '#fef9c3', text: '#854d0e', border: '#fde047' }, // yellow-100 / yellow-800
+  blue:   { bg: '#dbeafe', text: '#1d4ed8', border: '#bfdbfe' }, 
+  red:    { bg: '#fee2e2', text: '#b91c1c', border: '#fecaca' }, 
+  green:  { bg: '#dcfce7', text: '#15803d', border: '#bbf7d0' }, 
+  purple: { bg: '#f3e8ff', text: '#7e22ce', border: '#e9d5ff' }, 
+  yellow: { bg: '#fef9c3', text: '#854d0e', border: '#fde047' }, 
 };
 
 export default function Calendar() {
@@ -20,8 +20,6 @@ export default function Calendar() {
   const [events, setEvents] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  
-  // New state to track if we are editing
   const [editingEvent, setEditingEvent] = useState<any>(null);
 
   const days = getMonth(currentDate);
@@ -37,14 +35,11 @@ export default function Calendar() {
 
   useEffect(() => { fetchEvents(); }, []);
 
-  // Handle Save (Create OR Update)
   const handleSaveEvent = async (eventData: any) => {
     try {
       if (eventData.id) {
-        // UPDATE existing event
         await axios.put(`/api/events/${eventData.id}`, eventData);
       } else {
-        // CREATE new event
         await axios.post('/api/events', eventData);
       }
       fetchEvents();
@@ -54,7 +49,6 @@ export default function Calendar() {
     }
   };
 
-  // Handle Delete
   const handleDelete = async (id: number) => {
     if(confirm('Delete this event?')) {
       try {
@@ -66,14 +60,12 @@ export default function Calendar() {
     }
   };
 
-  // Open Modal for New Event
   const handleDateClick = (date: Date) => {
     setEditingEvent(null);
     setSelectedDate(date);
     setIsModalOpen(true);
   };
 
-  // Open Modal for Editing
   const handleEventClick = (e: React.MouseEvent, event: any) => {
     e.stopPropagation();
     setEditingEvent(event);
@@ -125,52 +117,53 @@ export default function Calendar() {
             ))}
           </div>
           <div className="flex-1 grid grid-cols-7 grid-rows-5">
-            {days.map((day, idx) => (
-              <div 
-                key={idx} 
-                className={cn(
-                  "border-b border-r min-h-[100px] p-1 transition-colors hover:bg-gray-50 cursor-pointer",
-                  !isSameMonth(day, currentDate) && "bg-gray-50/50"
-                )}
-                onClick={() => handleDateClick(day)}
-              >
-                <div className="flex justify-center mb-1">
-                  <span className={cn(
-                    "text-xs font-medium w-7 h-7 flex items-center justify-center rounded-full",
-                    isToday(day) ? "bg-blue-600 text-white" : "text-gray-700"
-                  )}>
-                    {format(day, 'd')}
-                  </span>
+            {days.map((day, idx) => {
+              // CHANGE: Logic to hide days not in the current month
+              if (!isSameMonth(day, currentDate)) {
+                 return <div key={idx} className="border-b border-r min-h-[100px] bg-gray-50/20" />;
+              }
+
+              return (
+                <div 
+                  key={idx} 
+                  className="border-b border-r min-h-[100px] p-1 transition-colors hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleDateClick(day)}
+                >
+                  <div className="flex justify-center mb-1">
+                    <span className={cn(
+                      "text-xs font-medium w-7 h-7 flex items-center justify-center rounded-full",
+                      isToday(day) ? "bg-blue-600 text-white" : "text-gray-700"
+                    )}>
+                      {format(day, 'd')}
+                    </span>
+                  </div>
+                  
+                  <div className="flex flex-col gap-1">
+                    {events
+                      .filter(e => new Date(e.startTime).toDateString() === day.toDateString())
+                      .map((e) => {
+                        const style = colorStyles[e.color] || colorStyles.blue;
+                        return (
+                          <div 
+                            key={e.id}
+                            onClick={(ev) => handleEventClick(ev, e)}
+                            style={{ 
+                              backgroundColor: style.bg, 
+                              color: style.text,
+                              borderColor: style.border 
+                            }}
+                            className="group text-xs rounded px-2 py-1 truncate font-medium border mb-1 flex justify-between items-center transition-all hover:brightness-95"
+                            title={e.description || e.title}
+                          >
+                            <span className="truncate">{e.title}</span>
+                          </div>
+                        );
+                      })
+                    }
+                  </div>
                 </div>
-                
-                <div className="flex flex-col gap-1">
-                  {events
-                    .filter(e => new Date(e.startTime).toDateString() === day.toDateString())
-                    .map((e) => {
-                      // Get color styles safely
-                      const style = colorStyles[e.color] || colorStyles.blue;
-                      
-                      return (
-                        <div 
-                          key={e.id}
-                          onClick={(ev) => handleEventClick(ev, e)}
-                          // HERE IS THE FIX: Applying inline styles directly
-                          style={{ 
-                            backgroundColor: style.bg, 
-                            color: style.text,
-                            borderColor: style.border 
-                          }}
-                          className="group text-xs rounded px-2 py-1 truncate font-medium border mb-1 flex justify-between items-center transition-all hover:brightness-95"
-                          title={e.description || e.title}
-                        >
-                          <span className="truncate">{e.title}</span>
-                        </div>
-                      );
-                    })
-                  }
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </main>
       </div>
